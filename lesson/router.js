@@ -1,3 +1,5 @@
+'use strict';
+
 const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
@@ -11,15 +13,12 @@ const Lesson = require('./models');
 // @desc      GET lessons
 // @access    Public
 router.get('/', (req, res) => {
-  let error = new Error('Unable to retrieve lessons');
-  error.code = 400;
   Lesson.find()
     .then(lessons => res.json(lessons))
     .catch(err => {
-      console.log(JSON.stringify(err));
-      error.message = err.message
-      next(err)
-    })
+      console.log(err)
+      res.status(404).json(err)
+    });
 });
 
 // @route     GET api/lesson/:id
@@ -28,15 +27,16 @@ router.get('/', (req, res) => {
 router.get('/:id', jwtAuth, (req, res) => {
   Lesson.findById(req.params.id)
     .then(lesson => res.json(lesson))
-    .catch(err => res.status(404).json(err));
+    .catch(err => {
+      console.log(err);
+      res.status(404).json(err);
+    });
 });
 
 // @route     POST api/lesson
 // @desc      Create Lesson
 // @access    Private
 router.post('/', jwtAuth, (req, res, next) => {
-  let error = new Error('Unable to create lesson');
-  error.code = 400;
   const newLesson = new Lesson({
     title: req.body.title,
     description: req.body.description
@@ -45,11 +45,7 @@ router.post('/', jwtAuth, (req, res, next) => {
   newLesson
     .save()
     .then(lesson => res.json(lesson))
-    .catch(err => {
-      console.log('JSON ERROR : '+JSON.stringify(err));
-       // Need to work on this error handleing 
-       res.status(404).json(err);
-    })
+    .catch(err =>  res.status(400).json(err.message))
 });
 
 // @route     Edit api/lesson/:id
@@ -60,15 +56,10 @@ router.put('/:id', jwtAuth, (req, res, next) => {
       ...req.body
   }, {
     new: true 
-  }).then((data) =>{
-    console.log(data);
-    res.status(200).json(data);
-  }).catch(err => {
-    console.log(JSON.stringify(err)); // Not sure how error is being handled exactly
-    res.status(404).json(err);
   })
- 
-  });
+    .then((data) => res.status(200).json(data))
+    .catch(err => res.status(404).json(err.message));
+});
 
 // @route     POST api/lesson/comment/:lesson_id
 // @desc      ADD Comment to Lesson
@@ -83,18 +74,13 @@ router.post('/comment/:id', jwtAuth, (req, res, next) => {
 
       lesson.addComment(newComment).then(lesson => res.json(lesson))
     })
-    .catch(err => {
-      console.log(JSON.stringify(err));
-      res.status(404).json(err);
-    })
-      
+    .catch(err => res.status(400).json(err.message));
 });
 
 // @route     DELETE api/lesson/comment/:lesson_id/:comment_id
 // @desc      Remove Comment from Post
 // @access    Private
 router.delete('/comment/:id/:comment_id', jwtAuth, (req, res) => {
-
   Lesson.findById(req.params.id)
     .then(lesson => {
       // Check to see if the comment exists
@@ -116,7 +102,7 @@ router.delete('/comment/:id/:comment_id', jwtAuth, (req, res) => {
       lesson.save().then(post => res.json(post));
 
     })
-    .catch(err => res.status(404).json(err));
+    .catch(err => res.status(400).json(err));
 })
 
 // @route     DELETE api/lesson/:id
@@ -132,8 +118,8 @@ router.delete('/:id', jwtAuth, (req, res, next) => {
       }));
     })
     .catch(err => {
-      console.log(JSON.stringify(err));
-      res.status(404).json(err);
+      console.log(err)
+      res.status(400).json(err);
     })
 });
 

@@ -1,5 +1,6 @@
-const mongoose = require('mongoose');
+'use strict';
 
+const mongoose = require('mongoose');
 
 module.exports = function (schema, opts) {
   // Add Comment Data to schema

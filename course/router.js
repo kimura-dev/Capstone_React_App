@@ -1,13 +1,12 @@
+'use strict';
+
 const express = require('express');
 const router = express.Router();
 const passport = require('passport');
 const localAuth = passport.authenticate('local', {session: false});
 const jwtAuth = passport.authenticate('jwt', {session: false});
 const bodyParser = require('body-parser');
-// const {ensurePublicOrOwner} = require('../helpers/auth');
 const {Course} = require('./models');
-
-
 
 // @route     GET api/course
 // @desc      GET courses
@@ -19,7 +18,7 @@ router.get('/', (req, res) => {
       console.log(courses);
       res.status(200).json(courses);
     }).catch(err => {
-      res.status(500).json({message: 'Internal server error'});
+      res.status(500).json({err, message: 'Internal server error'});
     });
 });
 
@@ -61,6 +60,7 @@ router.get('/:id', (req, res) => {
 router.post('/', jwtAuth, (req, res) => {
   const newCourse = {
     user: req.user,
+    // username: req.user.username,
     title: req.body.title,
     description: req.body.description,
     price: req.body.price
@@ -89,7 +89,7 @@ router.put('/:id', jwtAuth, (req, res) => {
     console.log(data);
     res.status(200).json(data);
   }).catch((err) => {
-    res.status(400).json(err);
+    res.status(404).json(err);
   });
  
 });
@@ -104,7 +104,7 @@ router.delete('/:id', jwtAuth,  (req, res) => {
       res.status(200).json({message:'Succussfully deleted'});
     }).catch(err => {
       console.log(err);
-      res.status(400).json(err);
+      res.status(404).json(err);
     });
 });
 

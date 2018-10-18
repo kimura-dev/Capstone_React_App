@@ -1,3 +1,4 @@
+
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
@@ -14,7 +15,7 @@ const LessonSchema = new Schema({
   video: {
     title: String,
     videoID: String,
-    url: String,
+    url: String
   },
   courseId: {
     type: Schema.Types.ObjectId,
