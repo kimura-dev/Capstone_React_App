@@ -30,6 +30,10 @@
     "test": "mocha",
     "start": "nodemon server.js"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kimura-dev1297/Capstone_React_App.git.git"
+  },
   "author": "Scott Reyell",
   "license": "ISC"
 }

@@ -14,10 +14,14 @@ const bcrypt = require('bcryptjs');
 // Load Models
 const {Course} = require('./course/models');
 // const {Log} = require('./log-entries/models');
+const {Lesson} = require('./lesson/models');
+
 
 // Load Routers
 const { router: usersRouter } = require('./users');
 const courseRouter = require('./course/router');
+const lessonRouter = require('./lesson/router');
+
 // const logRouter = require('./log-entries/router');
 const { router: authRouter, localStrategy, jwtStrategy } = require('./auth');
 
@@ -69,6 +73,8 @@ app.use((req, res, next) => {
 app.use('/api/users/', usersRouter);
 app.use('/api/auth/', authRouter);
 app.use('/api/course/', courseRouter);
+app.use('/api/lesson/', lessonRouter);
+
 // app.use('/api/logs/', logRouter);
 
 

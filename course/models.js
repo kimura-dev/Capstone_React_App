@@ -39,7 +39,7 @@ CourseSchema.virtual('user', {
   justOne: true
 });
 
-CourseSchema.plugin(require('./plugins/comments'));
+CourseSchema.plugin(require('../plugins/comments'));
 
 const Course = mongoose.model('Course', CourseSchema);
 

@@ -60,29 +60,36 @@ router.get('/:id', (req, res) => {
 // @access    Private
 router.post('/', jwtAuth, (req, res) => {
 
-  const newCourse = new Course({
+  const newCourse = {
+    user: req.user,
     title: req.body.title,
     description: req.body.description,
     price: req.body.price
-  });
+  }
 
-  // Create Category
-  newCourse.save().then(course => {
-      res.status(200).json(course);
-    }).catch(err => {
-      console.log(err);
-      if(err.name === 'ValidationError'){
-        return res.status(422).json({message:err.message, kind:err.kind, path: err.path, value: err.value});
-      }
-      res.status(400).json({message:'Invalid request'});
-    });
+
+  console.log('-------------------------------------------');
+  console.log(newCourse); 
+  // Create Course
+  new Course(newCourse)
+  .save()
+  .then(course => {
+    console.log(course);
+    res.status(200).json(course);
+  }).catch(err => {
+    console.log(err);
+    if(err.name === 'ValidationError'){
+      return res.status(422).json({message:err.message, kind:err.kind, path: err.path, value: err.value});
+    }
+    res.status(400).json({message:'Invalid request'});
+  });
 });
 
 // @route     PUT api/course/:id
 // @desc      Edit Course
 // @access    Private
 router.put('/:id', jwtAuth, (req, res) => {
-  Category.findByIdAndUpdate(req.params.id, {
+  Course.findByIdAndUpdate(req.params.id, {
 
       ...req.body
   }, {
