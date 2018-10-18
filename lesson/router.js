@@ -28,9 +28,7 @@ router.get('/', (req, res) => {
 router.get('/:id', jwtAuth, (req, res) => {
   Lesson.findById(req.params.id)
     .then(lesson => res.json(lesson))
-    .catch(err => res.status(404).json({
-      nolessonfound: 'No lesson found with that ID'
-    }));
+    .catch(err => res.status(404).json(err));
 });
 
 // @route     POST api/lesson
@@ -48,16 +46,16 @@ router.post('/', jwtAuth, (req, res, next) => {
     .save()
     .then(lesson => res.json(lesson))
     .catch(err => {
-      // console.log(JSON.stringify(err));
-      error.message = err.message
-      next(err.message)  // Need to work on this error handleing 
+      console.log('JSON ERROR : '+JSON.stringify(err));
+       // Need to work on this error handleing 
+       res.status(404).json(err);
     })
 });
 
-// Edit Form Process
+// @route     Edit api/lesson/:id
+// @desc      Edit Lesson
+// @access    Private
 router.put('/:id', jwtAuth, (req, res, next) => {
-  let error = new Error('Unable to update lesson');
-  error.code = 400;
   Lesson.findByIdAndUpdate(req.params.id, {
       ...req.body
   }, {
@@ -66,48 +64,16 @@ router.put('/:id', jwtAuth, (req, res, next) => {
     console.log(data);
     res.status(200).json(data);
   }).catch(err => {
-    console.log(JSON.stringify(err));
-    error.message = err.message
-    next(err)
+    console.log(JSON.stringify(err)); // Not sure how error is being handled exactly
+    res.status(404).json(err);
   })
  
   });
-
-
-// @route     DELETE api/lesson/:id
-// @desc      Delete Lesson
-// @access    Private
-router.delete('/:id', jwtAuth, (req, res, next) => {
-  let error = new Error('Unable to find lesson');
-  error.code = 404;
-  Lesson.findById(req.params.id)
-    .then(lesson => {
-      //Check to make sure lesson owner
-      // if (lesson.user.toString() !== req.user.id) {
-      //   return res.status(401).json({
-      //     notAuthorized: 'User not authorized'
-      //   });
-      // }
-
-      // Delete
-      lesson.remove().then(() => res.json({
-        success: true
-      }));
-    })
-    .catch(err => {
-      console.log(JSON.stringify(err));
-      error.message = err.message
-      next(err)
-    })
-});
 
 // @route     POST api/lesson/comment/:lesson_id
 // @desc      ADD Comment to Lesson
 // @access    Private
 router.post('/comment/:id', jwtAuth, (req, res, next) => {
-  let error = new Error('Unable to post comment on lesson');
-  error.code = 404;
-
   Lesson.findById(req.params.id)
     .then(lesson => {
       const newComment = {
@@ -119,8 +85,7 @@ router.post('/comment/:id', jwtAuth, (req, res, next) => {
     })
     .catch(err => {
       console.log(JSON.stringify(err));
-      error.message = err.message
-      next(err)
+      res.status(404).json(err);
     })
       
 });
@@ -151,10 +116,26 @@ router.delete('/comment/:id/:comment_id', jwtAuth, (req, res) => {
       lesson.save().then(post => res.json(post));
 
     })
-    .catch(err => res.status(404).json({
-      lessonnotfound: 'Lesson not found'
-    }))
+    .catch(err => res.status(404).json(err));
 })
+
+// @route     DELETE api/lesson/:id
+// @desc      Delete Lesson
+// @access    Private
+router.delete('/:id', jwtAuth, (req, res, next) => {
+  Lesson.findById(req.params.id)
+    .then(lesson => {
+      
+      // Delete
+      lesson.remove().then(() => res.json({
+        success: true
+      }));
+    })
+    .catch(err => {
+      console.log(JSON.stringify(err));
+      res.status(404).json(err);
+    })
+});
 
 
 module.exports = router;

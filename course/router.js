@@ -24,19 +24,19 @@ router.get('/', (req, res) => {
 });
 
 // @route     GET api/course/my
-// @desc      GET all cuurent users courses
+// @desc      GET all current users courses
 // @access    Public
-// router.get('/my', jwtAuth, (req, res) => {
-//   Category.find({username: req.user.username})
-//     .populate('user','username firstName lastName')
-//     .then(categories => {
-//       res.status(200).json(categories);
-//       console.log('/my : ctaegories' +categories);
-//     }).catch(err => {
-//       console.error(err);
-//       res.status(500).json({message:'Internal server error'});
-//     });
-// });
+router.get('/my', jwtAuth, (req, res) => {
+  Course.find({username: req.user.username})
+    .populate('user','username firstName lastName')
+    .then(courses => {
+      res.status(200).json(courses);
+      console.log('/my : ctaegories' +courses);
+    }).catch(err => {
+      console.error(err);
+      res.status(500).json({message:'Internal server error'});
+    });
+});
 
 // @route     GET api/course/:id
 // @desc      GET a single course by id
@@ -44,14 +44,14 @@ router.get('/', (req, res) => {
 router.get('/:id', (req, res) => {
   Course.findOne({
     _id: req.params.id
-  })
-  // .populate('user','username firstName lastName')
-  // .populate('comments.user','username firstName lastName')
+  }) 
+  // .populate('user','username firstName lastName') // user is returning null
+  // .populate('comments.user','username firstName lastName') 
   .then(course => { 
    res.status(200).json(course);
   }).catch(err => {
     console.error(err);
-    res.status(500).json({message:'Internal server error'});
+    res.status(404).json(err);
   });
 });
 
@@ -59,17 +59,12 @@ router.get('/:id', (req, res) => {
 // @desc      Create Course
 // @access    Private
 router.post('/', jwtAuth, (req, res) => {
-
   const newCourse = {
     user: req.user,
     title: req.body.title,
     description: req.body.description,
     price: req.body.price
   }
-
-
-  console.log('-------------------------------------------');
-  console.log(newCourse); 
   // Create Course
   new Course(newCourse)
   .save()
@@ -78,10 +73,7 @@ router.post('/', jwtAuth, (req, res) => {
     res.status(200).json(course);
   }).catch(err => {
     console.log(err);
-    if(err.name === 'ValidationError'){
-      return res.status(422).json({message:err.message, kind:err.kind, path: err.path, value: err.value});
-    }
-    res.status(400).json({message:'Invalid request'});
+    res.status(400).json(err);
   });
 });
 
@@ -90,7 +82,6 @@ router.post('/', jwtAuth, (req, res) => {
 // @access    Private
 router.put('/:id', jwtAuth, (req, res) => {
   Course.findByIdAndUpdate(req.params.id, {
-
       ...req.body
   }, {
     new: true 
@@ -98,14 +89,10 @@ router.put('/:id', jwtAuth, (req, res) => {
     console.log(data);
     res.status(200).json(data);
   }).catch((err) => {
-    console.log(err);
-    if(err.name === 'ValidationError'){
-      return res.status(422).json({message:err.message, kind:err.kind, path: err.path, value: err.value});
-    }
-    res.status(400).json({message:'Failed to update course'});
-    });
- 
+    res.status(400).json(err);
   });
+ 
+});
 
 // @route     DELETE api/course/:id
 // @desc      Delete Course
@@ -117,10 +104,7 @@ router.delete('/:id', jwtAuth,  (req, res) => {
       res.status(200).json({message:'Succussfully deleted'});
     }).catch(err => {
       console.log(err);
-      if(err.name === 'ValidationError'){
-        return res.status(422).json({message:err.message, kind:err.kind, path: err.path, value: err.value});
-      }
-      res.status(400).json({message:'Invalid request'});
+      res.status(400).json(err);
     });
 });
 
