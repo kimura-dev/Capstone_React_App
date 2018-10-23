@@ -7,6 +7,7 @@ mongoose.Promise = global.Promise;
 const UserSchema = mongoose.Schema({
   username: {
     type: String,
+    min: 1,
     required: true
   },
   email: {
@@ -15,25 +16,41 @@ const UserSchema = mongoose.Schema({
   },
   password: {
     type: String,
+    min: 6,
+    max: 72,
     required: true
   },
-  avatar: {
-    type: String,
-  },
+  // unlocked: [{
+  //   type: String,
+  //   course: {
+  //     type: mongoose.Schema.Types.ObjectId,
+  //     ref: 'Course'
+  //   },
+  //   videoViews: [Number]
+  // }],
+  courses: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Course'
+  }],
   date: {
     type: Date,
     default: Date.now
   },
-  accountType: {
-    type: String,
-    default: 'student'
-  },
+  // accountType: {
+  //   type: String,
+  //   default: 'student'
+  // },
   firstName: {
     type: String, default: ''
   },
   lastName: {
     type: String, default: ''
   }
+});
+
+UserSchema.pre('find', function(next) {
+  this.populate('course');
+  next();
 });
 
 UserSchema.methods.serialize = function() {

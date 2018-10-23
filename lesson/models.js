@@ -12,16 +12,21 @@ const LessonSchema = new Schema({
     type: String,
     required: true
   },
-  video: {
-    title: String,
-    videoID: String,
-    url: String
+  videoUrl: {
+    type: String,
+    required: true
   },
   courseId: {
     type: Schema.Types.ObjectId,
     ref: 'Course'
   }
 });
+
+// LessonSchema.pre('find', function(next) {
+//   this.populate('course');
+//   next();
+// });
+
 
 LessonSchema.plugin(require('../plugins/comments'));
 

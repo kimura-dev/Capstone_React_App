@@ -17,7 +17,7 @@ const CourseSchema = new Schema({
     required: true
   },
   lessons: [{
-    type: Schema.Types.ObjectId,
+    type: Schema.Types.ObjectId, 
     ref: 'Lesson'
   }],
   price: {
@@ -32,6 +32,11 @@ const CourseSchema = new Schema({
   toJSON: {
     virtuals: true
   }
+});
+
+CourseSchema.pre('findOne', function(next) {
+  this.populate('user');
+  next();
 });
 
 CourseSchema.virtual('user', {

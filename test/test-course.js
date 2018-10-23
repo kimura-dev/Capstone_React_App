@@ -10,21 +10,21 @@ const { app, runServer, closeServer } = require("../server");
 
 chai.use(chaiHttp);
 
-function expectCategory(category) {
-  expect(category).to.be.a("object");
-  expect(category).to.include.keys(
+function expectCourse(course) {
+  expect(course).to.be.a("object");
+  expect(course).to.include.keys(
     "id",
     "title",
     "description",
-    "status",
+    "price",
     "username",
-    "videos",
-    "comments",
+    "lessons",
+    "timesPurchased",
     "user"
   );
 }
 
-describe("Category", function() {
+describe("Course", function() {
   before(function() {
     return runServer();
   });
@@ -37,6 +37,7 @@ describe("Category", function() {
   const username = 'exampleUser';
 
   beforeEach(function(){
+    const email = 'exampleUser@example.com';
     const password = 'examplePass';
     const firstName = 'Example';
     const lastName = 'User';
@@ -44,7 +45,9 @@ describe("Category", function() {
     return User.hashPassword(password).then(password =>
       User.create({
         username,
+        email,
         password,
+        // unlocked,
         firstName,
         lastName
       })).then(() => {
@@ -75,43 +78,46 @@ describe("Category", function() {
   it("should list items on GET", function() {
     return chai
       .request(app)
-      .get("/api/categories")
+      .get("/api/course")
       .then(function(res) {
         expect(res).to.have.status(200);
         expect(res).to.be.json;
         expect(res.body).to.be.an("array");
         expect(res.body.length).to.be.above(0);
-        const categories  = res.body;
-        categories.forEach(expectCategory);
+        const courses  = res.body;
+        courses.forEach(expectCourse);
       });
   });
 
-  it("should add a category on POST", function() {
-    const newCategory = {
+  it("should add a course on POST", function() {
+    const newCourse = {
+      username: "exampleUser",
       title: "Lorem ip some",
       description: "foo foo foo foo",
-      status: "Public",
-      videos: [{title:"Video Title", url:"http://example@example.com", videoID:'3452qtyz'}]
+      lessons: ["http://example@example.com"],
+      price: 5,
+      timesPurchased: 0
     };
-    const expectedKeys = ["id"].concat(Object.keys(newCategory));
-    const expectedVideoKeys = ["_id"].concat(Object.keys(newCategory.videos[0]));
+    const expectedKeys = ["id"].concat(Object.keys(newCourse));
+    const expectedLessonKeys = ["_id"].concat(Object.keys(newCourse.lessons[0]));
 
     return chai
       .request(app)
-      .post("/api/categories")
+      .post("/api/course")
       .set('authorization', `Bearer ${token}`)
-      .send(newCategory)
+      .send(newCourse)
       .then(function(res) {
         expect(res).to.have.status(200);
         expect(res).to.be.json;
         expect(res.body).to.be.a("object");
         expect(res.body).to.include.keys(expectedKeys);
-        expect(res.body.videos).to.be.a('array');
-        expect(res.body.videos).to.have.lengthOf(1);
-        expect(res.body.videos[0]).to.include.keys(expectedVideoKeys);
-        expect(res.body.title).to.equal(newCategory.title);
-        expect(res.body.description).to.equal(newCategory.description);
-        expect(res.body.status).to.equal(newCategory.status);
+        expect(res.body.lessons).to.be.a('array');
+        expect(res.body.lessons).to.have.lengthOf(1);
+        expect(res.body.lessons[0]).to.include.keys(expectedLessonKeys);
+        expect(res.body.title).to.equal(newCourse.title);
+        expect(res.body.description).to.equal(newCourse.description);
+        expect(res.body.price).to.equal(newCourse.price);
+        expect(res.body.timesPurchased).to.equal(newCourse.timesPurchased);
         expect(res.body.username).to.equal(username);
       });
   });
@@ -119,8 +125,8 @@ describe("Category", function() {
   it("should error if POST missing expected values", function() {
     const badRequestData = {};
     return chai
-      .request(app)
-      .post("/api/categories")
+      .request(app) 
+      .post("/api/course")
       .set('authorization', `Bearer ${token}`)
       .send(badRequestData)
       .then(function(res) {
@@ -134,22 +140,22 @@ describe("Category", function() {
       })
   });
 
-  it("should update category on PUT", function() {
+  it("should update course on PUT", function() {
     return (
       chai
         .request(app)
         // first have to get
-        .get("/api/categories")
+        .get("/api/course")
         .then(function(res) {
-          const updatedPost = Object.assign(res.body[0], {
+          const updatedCourse = Object.assign(res.body[0], {
             title: "connect the dots",
             description: "la la la la la"
           });
           return chai
             .request(app)
-            .put(`/api/categories/${res.body[0].id}`)
+            .put(`/api/course/${res.body[0].id}`)
             .set('authorization', `Bearer ${token}`)
-            .send(updatedPost)
+            .send(updatedCourse)
             .then(function(res) {
               expect(res).to.have.status(200);
             });
@@ -157,57 +163,16 @@ describe("Category", function() {
     );
   });
 
-  it("should add a video", function(){
-    return (
-      chai
-        .request(app)
-        .get('/api/categories')
-        .then(function(res) {
-          const category = res.body[0];
-          const video = {
-            title: "connect the dots",
-            videoID: "345edfghsd",
-            url:"http://example@example.com"
-          };
-
-          const expectedKeys = Object.keys(video)
-          expectedKeys.push('_id');
-         
-          category.videos.push(video);
-
-          return chai
-          .request(app)
-          .put(`/api/categories/${category.id}`)
-          .set('authorization', `Bearer ${token}`)
-          .send(category)
-          .then(function(res) {
-            expect(res).to.have.status(200);
-            expect(res.body.videos).to.be.an('array');
-            expect(res.body.videos).to.be.an('array');
-            expect(res.body.videos.length).to.be.greaterThan(0);
-
-            const lastVideo = res.body.videos[res.body.videos.length-1];
-
-            expect(lastVideo).to.be.an('object');
-            expect(lastVideo).to.include.keys(expectedKeys);
-            expect(lastVideo.title).to.equal(video.title);
-            expect(lastVideo.videoID).to.equal(video.videoID);
-            expect(lastVideo.url).to.equal(video.url);
-          });
-        })
-    )
-  })
-
-  it("should delete category on DELETE", function() {
+  it("should delete course on DELETE", function() {
     return (
       chai
         .request(app)
         // first have to get
-        .get("/api/categories")
+        .get("/api/course")
         .then(function(res) {
           return chai
             .request(app)
-            .delete(`/api/categories/${res.body[0].id}`)
+            .delete(`/api/course/${res.body[0].id}`)
             .set('authorization', `Bearer ${token}`)
             .then(function(res) {
               expect(res).to.have.status(200);

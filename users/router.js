@@ -6,6 +6,8 @@ const router = express.Router();
 const jsonParser = bodyParser.json();
 const bcrypt = require('bcryptjs');
 const {createAuthToken} = require('../auth/router');
+const passport = require('passport');
+const jwtAuth = passport.authenticate('jwt', {session: false});
 
 // Post to register a new user
 router.post('/', jsonParser, (req, res) => {
@@ -143,10 +145,60 @@ router.post('/', jsonParser, (req, res) => {
     });
 });
 
-router.get('/', (req, res) => {
-  return User.find()
-    .then(users => res.json(users.map(user => user.serialize())))
-    .catch(err => res.status(500).json({message: 'Internal server error'}));
-});
+
+// @route     GET api/users/:username
+// @desc      GET a single user by username
+// @access    Public
+// Working
+router.get('/:username', (req, res) => {
+  User.findOne({username: req.params.username})
+    // .populate('courses','user','username firstName lastName')
+    .then(user => {
+      res.status(200).json(user);
+      console.log('/course/user/:username : courses' + courses);
+    }).catch(err => {
+      console.error(err);
+      res.status(500).json({message:'Internal server error'});
+    });
+})
+
+// @route     GET api/users/:username
+// @desc      GET a single user by username
+// @access    Public
+// NOT Working!!
+router.get('/:username/courses', (req, res) => {
+  User.find({username: req.params.username})
+    // .populate('courses','user','username firstName lastName')
+    .then(user => {
+      res.status(200).json(user.courses);
+      console.log('/users/:username/courses' + courses);
+    }).catch(err => {
+      console.error(err);
+      res.status(500).json({message:'Internal server error'});
+    });
+})
+
+// @route     GET api/users/:username
+// @desc      GET a single user by username
+// @access    Public
+// NOT Working!!
+// router.get('/:username/courses', (req, res) => {
+//   User.find({username: req.params.username})
+//     // .populate('courses','user','username firstName lastName')
+//     .then(user => {
+//       res.status(200).json(user.courses);
+//       console.log('/course/user/:username : courses' + courses);
+//     }).catch(err => {
+//       console.error(err);
+//       res.status(500).json({message:'Internal server error'});
+//     });
+// })
+
+
+// router.get('/', (req, res) => {
+//   return User.find()
+//     .then(users => res.json(users.map(user => user.serialize())))
+//     .catch(err => res.status(500).json({message: 'Internal server error'}));
+// });
 
 module.exports = {router};

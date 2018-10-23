@@ -1,0 +1,11 @@
+language: node_js
+node_js: node
+services:
+  - mongodb
+deploy:
+  provider: heroku
+  api_key:
+    secure: O5gJTnrdWbidoJLPr8boUDuPZbFmoDWUso2WN03KXBkwB0z5XVLgHSapm5zL7M15xok+8XxSPCUgm+/unopdjaFRGUhnKKx4qcToku7+y9QDfDPECQo88rsyBj5tDee+t5dUEd56hokaovc+vFrcJU2CQLVtL0S3ScKU8CZWtw8ZN9jYhvUF3x0DFubQ90uma0o3rEfoLoncwmeWLw9OOg2m5vc/R21eie5qoBklHQLCDvlExLUp3/wULodPO7vspG1tezkXMfkzlcvhkgWdbuzDLFpjznMcYca7wiC2jMx/qBHiNR2xSWwiX38VxePsKXUk0WshYXMKzkwHaZFv41kVZlSY0J1ZtA3pK/dNH7bJwuT29MMd+2jiWCtk/4J6HpKbHU6AnO6bQeV75f2LY4xePzfwGQ8p9BsCqAK4etrPCOPqc/K3Zwhnj8L9SFN/CaBYh6OScioXuq1diDbHicK4osaBUwELCA4XvVc7+Alz2/32aAUrDl+3X4c2O25LyOIp4NE3cokdWrIiKouQmiUk4TODj+fa4P+infL6zGp6MnZAsyOwXxF4zUn1+aFrXq684xS33uVHyXhMnFJPQojsoKInusUgLo19AOoVO1rPuZc4iUTdpx/FAPG2nPL0qZ/kgqUaesROc+4PV4QLX1kHYaKRQuaxTxswvArFmQY=
+  app: infinite-oasis-77848
+  on:
+    repo: kimura-dev1297/Capstone_React_App

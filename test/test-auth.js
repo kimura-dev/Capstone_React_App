@@ -16,7 +16,9 @@ chai.use(chaiHttp);
 
 describe('Auth endpoints', function () {
   const username = 'exampleUser';
+  const email = 'exampleUser@example.com';
   const password = 'examplePass';
+  const avatar = 'examplePass';
   const firstName = 'Example';
   const lastName = 'User';
 
@@ -32,6 +34,7 @@ describe('Auth endpoints', function () {
     return User.hashPassword(password).then(password =>
       User.create({
         username,
+        email,
         password,
         firstName,
         lastName

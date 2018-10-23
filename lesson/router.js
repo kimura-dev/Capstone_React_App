@@ -5,6 +5,8 @@ const router = express.Router();
 const mongoose = require('mongoose');
 const passport = require('passport');
 const jwtAuth = passport.authenticate('jwt', {session: false});
+const {Course} = require('../course/models');
+
 
 // Profile Model
 const Lesson = require('./models');
@@ -39,12 +41,30 @@ router.get('/:id', jwtAuth, (req, res) => {
 router.post('/', jwtAuth, (req, res, next) => {
   const newLesson = new Lesson({
     title: req.body.title,
-    description: req.body.description
+    description: req.body.description,
+    videoUrl: req.body.videoUrl,
+    courseId: req.body.courseId
+    // courseId: course._id
   });
+
+  // newLesson
+  //   .save()
+  //   .then(lesson => {
+      
+  //   })
 
   newLesson
     .save()
-    .then(lesson => res.json(lesson))
+    .then(lesson => {
+
+      return  Course.findByIdAndUpdate(lesson.courseId, {
+        $push: { lessons: lesson }
+        
+      }, { new: true }) 
+      .then(course => {  
+        res.json(lesson)
+      })
+    })
     .catch(err =>  res.status(400).json(err.message))
 });
 
@@ -57,8 +77,17 @@ router.put('/:id', jwtAuth, (req, res, next) => {
   }, {
     new: true 
   })
-    .then((data) => res.status(200).json(data))
-    .catch(err => res.status(404).json(err.message));
+    .then((lesson) => {
+      let error = new Error('Lesson not found');
+      error.code = 401
+      // Check for user
+      if (!lesson) {
+        return next(error)
+      }
+      res.status(200).json(lesson)
+    })
+    // If lesson doesnt exist err, deal with it. Right now it just sends back null
+    .catch(err => res.status(404).json(err));
 });
 
 // @route     POST api/lesson/comment/:lesson_id
@@ -69,6 +98,7 @@ router.post('/comment/:id', jwtAuth, (req, res, next) => {
     .then(lesson => {
       const newComment = {
         body: req.body.body,
+        // User is not showing up on comments
         user: req.user.username
       }
 
@@ -83,11 +113,11 @@ router.post('/comment/:id', jwtAuth, (req, res, next) => {
 router.delete('/comment/:id/:comment_id', jwtAuth, (req, res) => {
   Lesson.findById(req.params.id)
     .then(lesson => {
+      let error = new Error('Comment not found');
+      error.code = 401
       // Check to see if the comment exists
       if (lesson.comments.filter(comment => comment._id.toString() === req.params.comment_id).length === 0) {
-        return res.status(404).json({
-          commentnotfound: 'Comment not found'
-        });
+        return res.status(404).json(error);
       }
 
       // Get the comment to remove
@@ -99,7 +129,7 @@ router.delete('/comment/:id/:comment_id', jwtAuth, (req, res) => {
       lesson.comments.splice(removeIndex, 1);
 
       // Save
-      lesson.save().then(post => res.json(post));
+      lesson.save().then(lesson => res.json(lesson));
 
     })
     .catch(err => res.status(400).json(err));
