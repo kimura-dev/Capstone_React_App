@@ -36,7 +36,7 @@ router.get('/:id', jwtAuth, (req, res) => {
 });
 
 // @route     POST api/lesson
-// @desc      Create Lesson
+// @desc      Create Lesson then add lesson to lessons [] on Course
 // @access    Private
 router.post('/', jwtAuth, (req, res, next) => {
   const newLesson = new Lesson({
@@ -44,14 +44,7 @@ router.post('/', jwtAuth, (req, res, next) => {
     description: req.body.description,
     videoUrl: req.body.videoUrl,
     courseId: req.body.courseId
-    // courseId: course._id
   });
-
-  // newLesson
-  //   .save()
-  //   .then(lesson => {
-      
-  //   })
 
   newLesson
     .save()
@@ -108,7 +101,7 @@ router.post('/comment/:id', jwtAuth, (req, res, next) => {
 });
 
 // @route     DELETE api/lesson/comment/:lesson_id/:comment_id
-// @desc      Remove Comment from Post
+// @desc      Remove Comment from Lesson
 // @access    Private
 router.delete('/comment/:id/:comment_id', jwtAuth, (req, res) => {
   Lesson.findById(req.params.id)

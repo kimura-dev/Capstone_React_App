@@ -7,11 +7,12 @@ const localAuth = passport.authenticate('local', {session: false});
 const jwtAuth = passport.authenticate('jwt', {session: false});
 const bodyParser = require('body-parser');
 const {Course} = require('./models');
-const {User} = require('./models');
+const {User} = require('../users/models');
 
 // @route     GET api/course
 // @desc      GET all courses
 // @access    Public
+// 10/23 works
 router.get('/', (req, res) => {
   Course.find()
     .populate('user','username firstName lastName')
@@ -59,19 +60,19 @@ router.get('/:id', (req, res) => {
 // @route     POST api/course
 // @desc      Create Course
 // @access    Private
-// Issue       
-router.post('/', jwtAuth, (req, res) => {
+// Working       
+router.post('/', jwtAuth, bodyParser.json(), (req, res) => {
   const newCourse = {
     username: req.user.username,
     title: req.body.title,
     description: req.body.description,
-    lessons: req.body.lessons,
+    // lessons: req.body.lessons,
     price: req.body.price
   }
   
   // Create Course
   new Course(newCourse)
-  .populate('Lesson')
+  // .populate('Lesson')
   .save()
   .then(course => {
     console.log(course);
@@ -85,13 +86,17 @@ router.post('/', jwtAuth, (req, res) => {
 // @route     POST api/course/:courseID/purchase
 // @desc      Purchase Course
 // @access    Private
-router.post('/:id/purchase', jwtAuth, (req, res) => {
+router.post('/:id/purchase/:token', jwtAuth, (req, res) => {
+  if(!req.params.token){
+    return res.status(422).json({message: 'Invalid purchase token'})
+  }
+
   Course.findById(req.params.id)
     .then(course => {
       // Add to timesPurchased on Course.timesPurchased
        
       // Add to User.courses[]
-      return  User.findByIdAndUpdate (user.courses, {
+      return  User.findOneAndUpdate ({ username: req.user.username }, {
         $push: { courses: course }
         
       }, { new: true }) 
@@ -145,7 +150,7 @@ router.post('/comment/:id', jwtAuth, (req, res) => {
 });
 
 // @route     DELETE api/course/comment/:course_id/:comment_id
-// @desc      Remove Comment from Post
+// @desc      Remove Comment from Course
 // @access    Private
 router.delete('/comment/:id/:comment_id', jwtAuth, (req, res) => {
   Course.findById(req.params.id)

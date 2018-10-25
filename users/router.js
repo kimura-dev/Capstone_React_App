@@ -155,7 +155,6 @@ router.get('/:username', (req, res) => {
     // .populate('courses','user','username firstName lastName')
     .then(user => {
       res.status(200).json(user);
-      console.log('/course/user/:username : courses' + courses);
     }).catch(err => {
       console.error(err);
       res.status(500).json({message:'Internal server error'});
@@ -163,7 +162,7 @@ router.get('/:username', (req, res) => {
 })
 
 // @route     GET api/users/:username
-// @desc      GET a single user by username
+// @desc      GET 
 // @access    Public
 // NOT Working!!
 router.get('/:username/courses', (req, res) => {
@@ -177,28 +176,5 @@ router.get('/:username/courses', (req, res) => {
       res.status(500).json({message:'Internal server error'});
     });
 })
-
-// @route     GET api/users/:username
-// @desc      GET a single user by username
-// @access    Public
-// NOT Working!!
-// router.get('/:username/courses', (req, res) => {
-//   User.find({username: req.params.username})
-//     // .populate('courses','user','username firstName lastName')
-//     .then(user => {
-//       res.status(200).json(user.courses);
-//       console.log('/course/user/:username : courses' + courses);
-//     }).catch(err => {
-//       console.error(err);
-//       res.status(500).json({message:'Internal server error'});
-//     });
-// })
-
-
-// router.get('/', (req, res) => {
-//   return User.find()
-//     .then(users => res.json(users.map(user => user.serialize())))
-//     .catch(err => res.status(500).json({message: 'Internal server error'}));
-// });
 
 module.exports = {router};

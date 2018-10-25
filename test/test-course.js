@@ -1,6 +1,7 @@
 const chai = require("chai");
 const chaiHttp = require("chai-http");
 const {User} = require('../users');
+const {TEST_DATABASE_URL} = require('../config');
 const jwt = require('jsonwebtoken');
 const {JWT_SECRET} = require('../config');
 
@@ -26,7 +27,7 @@ function expectCourse(course) {
 
 describe("Course", function() {
   before(function() {
-    return runServer();
+    return runServer(TEST_DATABASE_URL);
   });
 
   after(function() {
@@ -75,32 +76,17 @@ describe("Course", function() {
   });
 
 
-  it("should list items on GET", function() {
-    return chai
-      .request(app)
-      .get("/api/course")
-      .then(function(res) {
-        expect(res).to.have.status(200);
-        expect(res).to.be.json;
-        expect(res.body).to.be.an("array");
-        expect(res.body.length).to.be.above(0);
-        const courses  = res.body;
-        courses.forEach(expectCourse);
-      });
-  });
 
   it("should add a course on POST", function() {
     const newCourse = {
-      username: "exampleUser",
+      // username: "exampleUser",
       title: "Lorem ip some",
       description: "foo foo foo foo",
-      lessons: ["http://example@example.com"],
       price: 5,
       timesPurchased: 0
     };
     const expectedKeys = ["id"].concat(Object.keys(newCourse));
-    const expectedLessonKeys = ["_id"].concat(Object.keys(newCourse.lessons[0]));
-
+    
     return chai
       .request(app)
       .post("/api/course")
@@ -111,9 +97,6 @@ describe("Course", function() {
         expect(res).to.be.json;
         expect(res.body).to.be.a("object");
         expect(res.body).to.include.keys(expectedKeys);
-        expect(res.body.lessons).to.be.a('array');
-        expect(res.body.lessons).to.have.lengthOf(1);
-        expect(res.body.lessons[0]).to.include.keys(expectedLessonKeys);
         expect(res.body.title).to.equal(newCourse.title);
         expect(res.body.description).to.equal(newCourse.description);
         expect(res.body.price).to.equal(newCourse.price);
@@ -138,6 +121,20 @@ describe("Course", function() {
         const res = err.response;
         expect(res).to.have.status(422);
       })
+  });
+
+  it("should list items on GET", function() {
+    return chai
+      .request(app)
+      .get("/api/course")
+      .then(function(res) {
+        expect(res).to.have.status(200);
+        expect(res).to.be.json;
+        expect(res.body).to.be.an("array");
+        expect(res.body.length).to.be.above(0);
+        const courses  = res.body;
+        courses.forEach(expectCourse);
+      });
   });
 
   it("should update course on PUT", function() {
