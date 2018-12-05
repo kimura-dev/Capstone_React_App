@@ -32,6 +32,10 @@ const UserSchema = mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Course'
   }],
+  watchedLessons: [{
+    type: Map,
+    of: Number
+  }],
   date: {
     type: Date,
     default: Date.now
@@ -49,7 +53,7 @@ const UserSchema = mongoose.Schema({
 });
 
 UserSchema.pre('find', function(next) {
-  this.populate('course');
+  this.populate('courses');
   next();
 });
 
@@ -57,7 +61,9 @@ UserSchema.methods.serialize = function() {
   return {
     username: this.username || '',
     firstName: this.firstName || '',
-    lastName: this.lastName || ''
+    lastName: this.lastName || '',
+    courses: this.courses || [],
+    watchedLessons: this.watchedLessons || []
   };
 };
 

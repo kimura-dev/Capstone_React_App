@@ -28,7 +28,39 @@ router.get('/', (req, res) => {
 // @access    Public
 router.get('/:id', jwtAuth, (req, res) => {
   Lesson.findById(req.params.id)
-    .then(lesson => res.json(lesson))
+    .populate('courseId')
+    .then(lesson => res.json(lesson.serialize()))
+    .catch(err => {
+      console.log(err);
+      res.status(404).json(err);
+    });
+});
+
+// @route     GET api/lesson/:id/watched
+// @desc      GET the amount of times lesson has been watched by logged in user
+// @access    Private
+router.get('/:id/watched', jwtAuth, (req, res) => {
+  User.findOne({
+    username: req.user.username
+  })
+    .then(user => res.json({watchedCount: user.watchedLessons[req.params.id]} || 0))
+    .catch(err => {
+      console.log(err);
+      res.status(404).json(err);
+    });
+});
+
+// @route     GET api/lesson/:id
+// @desc      GET a single lesson by id
+// @access    Public
+router.get('/:id/watch', jwtAuth, (req, res) => {
+  let keyName = `watchedLessons.${req.params.id}`;
+  Lesson.findById(req.params.id)
+    .then(lesson => {
+
+     return  User.findOneAndUpdate({username: req.user.username}, { $inc: {[keyName]: 1}})
+    })
+    .then(updateResult => res.redirect(lesson.videoUrl))
     .catch(err => {
       console.log(err);
       res.status(404).json(err);

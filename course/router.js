@@ -24,6 +24,13 @@ router.get('/', (req, res) => {
     });
 });
 
+router.post('/process-payment', (req, res) => {
+  // req.body will have some payment id and course id
+  // if payment is valid then add token to user course
+  // user will then need to purchase the course using that token /api/course/:id/purchase/:token
+
+})
+
 // @route     GET api/course/user/:username
 // @desc      GET all the courses authored by a current user
 // @access    Public
@@ -47,7 +54,7 @@ router.get('/:id', (req, res) => {
   Course.findOne({
     _id: req.params.id
   }) 
-  // .populate('user','username firstName lastName') // user is returning null
+  // .populate('lessons') 
   // .populate('comments.user','username firstName lastName') 
   .then(course => { 
    res.status(200).json(course);
@@ -62,6 +69,7 @@ router.get('/:id', (req, res) => {
 // @access    Private
 // Working       
 router.post('/', jwtAuth, bodyParser.json(), (req, res) => {
+
   const newCourse = {
     username: req.user.username,
     title: req.body.title,
@@ -69,47 +77,95 @@ router.post('/', jwtAuth, bodyParser.json(), (req, res) => {
     // lessons: req.body.lessons,
     price: req.body.price
   }
+
+  console.log(typeof req.body.lessons);
   
   // Create Course
   new Course(newCourse)
   // .populate('Lesson')
   .save()
   .then(course => {
-    console.log(course);
-    res.status(200).json(course);
+    // Make all lessons then update the old course lessons with new course lessons
+    let lessons = req.body.lessons.map(lesson => {
+       lesson.courseId = course._id;
+       return lesson;
+    })
+    return Lesson.insertMany( lessons ) 
+      .then(lessons => {
+        // add lessons to course
+        course.lessons = lessons
+        return course.save()
+      })
+      .then(course => {
+        console.log(course);
+        res.status(200).json(course);
+      })
   }).catch(err => {
     console.log(err);
     res.status(422).json(err.message);
   });
 });
 
-// @route     POST api/course/:courseID/purchase
-// @desc      Purchase Course
+// @route     POST api/course/:courseID/purchase/:token
+// @desc      Purchase Course, then adds course to User.courses as an ID
 // @access    Private
 router.post('/:id/purchase/:token', jwtAuth, (req, res) => {
-  if(!req.params.token){
-    return res.status(422).json({message: 'Invalid purchase token'})
-  }
 
   Course.findById(req.params.id)
     .then(course => {
-      // Add to timesPurchased on Course.timesPurchased
-       
-      // Add to User.courses[]
+      // let user = req.user.username;
+      // console.log(user);
+     
+      if(course.username === req.user.username) {
+        throw new Error('Cannot purchase the same course twice');        
+      }
+
+      let token = req.params.token;
+
+      if(!course.isValidToken(token)){
+        throw new Error('Invalid purchase token')
+      }
+
+      course.consumeToken(token)
+
+      return course.save();
+    })
+    .then( course => {
+
       return  User.findOneAndUpdate ({ username: req.user.username }, {
         $push: { courses: course }
         
       }, { new: true }) 
-      
+
       .then(user => {
         res.status(200).json(course)
       })
-    })
+    })  
     .catch(err => {
       console.log(err);
       res.status(422).json(err.message);
     });
 })
+
+// Version 2.0 Stripe Payment Method
+// @route     POST api/course/charge
+// @desc      Purchase Course, then will need to add the course to User.courses as an ID
+// @access    Private 
+
+// app.post("/charge", async (req, res) => {
+//   try {
+//     let {status} = await stripe.charges.create({
+//       amount: 2000,
+//       currency: "usd",
+//       description: "An example charge",
+//       source: req.body
+//     });
+
+//     res.json({status});
+//   } catch (err) {
+//     res.status(500).end();
+//   }
+// });
 
 // @route     PUT api/course/:id
 // @desc      Edit Course

@@ -16,9 +16,14 @@ const LessonSchema = new Schema({
     type: String,
     required: true
   },
+  // duration: {
+  //   value: Number,
+  //   default: 0
+  // },
   courseId: {
     type: Schema.Types.ObjectId,
-    ref: 'Course'
+    ref: 'Course',
+    required: true
   }
 });
 
@@ -26,6 +31,16 @@ const LessonSchema = new Schema({
 //   this.populate('course');
 //   next();
 // });
+
+LessonSchema.methods.serialize = function() {
+  return {
+    title: this.title,
+    description: this.description,
+    videoUrl: this.videoUrl,
+    courseId: this.courseId.serialize ? this.courseId.serialize() : this.courseId
+  }
+}
+
 
 
 LessonSchema.plugin(require('../plugins/comments'));

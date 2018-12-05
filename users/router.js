@@ -150,11 +150,11 @@ router.post('/', jsonParser, (req, res) => {
 // @desc      GET a single user by username
 // @access    Public
 // Working
-router.get('/:username', (req, res) => {
+router.get('/:username', jwtAuth, (req, res) => {
   User.findOne({username: req.params.username})
     // .populate('courses','user','username firstName lastName')
     .then(user => {
-      res.status(200).json(user);
+      res.status(200).json(user.serialize());
     }).catch(err => {
       console.error(err);
       res.status(500).json({message:'Internal server error'});
@@ -166,11 +166,11 @@ router.get('/:username', (req, res) => {
 // @access    Public
 // NOT Working!!
 router.get('/:username/courses', (req, res) => {
-  User.find({username: req.params.username})
-    // .populate('courses','user','username firstName lastName')
+  User.findOne({username: req.params.username})
+    .populate('courses')
     .then(user => {
-      res.status(200).json(user.courses);
-      console.log('/users/:username/courses' + courses);
+      console.log("---------------------------------------------" + user);
+      res.status(200).json(user.courses.map(course => course.serialize()));
     }).catch(err => {
       console.error(err);
       res.status(500).json({message:'Internal server error'});

@@ -27,7 +27,11 @@ const CourseSchema = new Schema({
   timesPurchased: {
     value: Number,
     default: 0
-  }
+  },
+  date: {
+    type: Date,
+    default: Date.now
+  },
 }, {
   toJSON: {
     virtuals: true
@@ -35,7 +39,7 @@ const CourseSchema = new Schema({
 });
 
 CourseSchema.pre('findOne', function(next) {
-  this.populate('user');
+  this.populate('user lessons');
   next();
 });
 
@@ -46,7 +50,22 @@ CourseSchema.virtual('user', {
   justOne: true
 });
 
+CourseSchema.methods.serialize = function() {
+  return {
+    _id: this._id || '',
+    username: this.username || '',
+    title: this.title || '',
+    description: this.description || '',
+    lessons: this.lessons || [],
+    timesPurchased: this.timesPurchased || [],
+    price: this.price || 0,
+    user: this.user && this.user.serialize() 
+  };
+};
+
 CourseSchema.plugin(require('../plugins/comments'));
+CourseSchema.plugin(require('../plugins/purchaseTokens'));
+
 
 const Course = mongoose.model('Course', CourseSchema);
 

@@ -10,6 +10,9 @@ const passport = require('passport');
 const {DATABASE_URL, PORT} = require('./config');
 const bcrypt = require('bcryptjs');
 
+// Version 2.0 Stripe Payment Method
+// const stripe = require("stripe")("sk_test_4eC39HqLyjWDarjtT1zdp7dc");
+
 
 // Load Models
 const {Course} = require('./course/models');
