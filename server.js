@@ -10,9 +10,6 @@ const passport = require('passport');
 const {DATABASE_URL, PORT} = require('./config');
 const bcrypt = require('bcryptjs');
 
-// Version 2.0 Stripe Payment Method
-// const stripe = require("stripe")("sk_test_4eC39HqLyjWDarjtT1zdp7dc");
-
 
 // Load Models
 const {Course} = require('./course/models');
@@ -31,12 +28,6 @@ const { router: authRouter, localStrategy, jwtStrategy } = require('./auth');
 mongoose.Promise = global.Promise;
 
 const app = express();
-
-// Helpers 
-// const {
-//   truncate,
-//   stripTags
-// } = require('./helpers/helpers');
 
 
 // Logging
@@ -57,8 +48,6 @@ app.use(function (req, res, next) {
 // Passport Middleware
 passport.use(localStrategy);
 passport.use(jwtStrategy);
-// app.use(passport.initialize());
-// app.use(passport.session());
 
 // Body Parser Middleware
 app.use(bodyParser.json());
@@ -77,8 +66,6 @@ app.use('/api/users/', usersRouter);
 app.use('/api/auth/', authRouter);
 app.use('/api/course/', courseRouter);
 app.use('/api/lesson/', lessonRouter);
-
-// app.use('/api/logs/', logRouter);
 
 
 // Set static folder

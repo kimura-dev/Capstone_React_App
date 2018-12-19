@@ -11,7 +11,6 @@ const jwtAuth = passport.authenticate('jwt', {session: false});
 
 // Post to register a new user
 router.post('/', jsonParser, (req, res) => {
-  console.log(req.body);
   const requiredFields = ['username','email', 'password'];
   const missingField = requiredFields.find(field => !(field in req.body));
 
@@ -169,7 +168,6 @@ router.get('/:username/courses', (req, res) => {
   User.findOne({username: req.params.username})
     .populate('courses')
     .then(user => {
-      console.log("---------------------------------------------" + user);
       res.status(200).json(user.courses.map(course => course.serialize()));
     }).catch(err => {
       console.error(err);

@@ -14,7 +14,7 @@ module.exports = function (schema, opts) {
   }
 
   schema.methods.consumeToken = function (token) {
-    this.timesPurchased ++;
+    this.timesPurchased++;
     return true;
     // let tokenIndex = this.purchaseTokens.indexOf(token)
 
@@ -24,3 +24,5 @@ module.exports = function (schema, opts) {
   }
 
 }
+
+

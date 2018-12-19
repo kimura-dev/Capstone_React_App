@@ -25,7 +25,7 @@ const CourseSchema = new Schema({
     default: 0
   },
   timesPurchased: {
-    value: Number,
+    type: Number,
     default: 0
   },
   date: {
@@ -57,7 +57,7 @@ CourseSchema.methods.serialize = function() {
     title: this.title || '',
     description: this.description || '',
     lessons: this.lessons || [],
-    timesPurchased: this.timesPurchased || [],
+    timesPurchased: this.timesPurchased || 0,
     price: this.price || 0,
     user: this.user && this.user.serialize() 
   };

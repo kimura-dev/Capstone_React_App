@@ -9,6 +9,9 @@ const bodyParser = require('body-parser');
 const {Course} = require('./models');
 const {User} = require('../users/models');
 
+// const validateCourseInput = require('../validation/course');
+
+
 // @route     GET api/course
 // @desc      GET all courses
 // @access    Public
@@ -17,7 +20,6 @@ router.get('/', (req, res) => {
   Course.find()
     .populate('user','username firstName lastName')
     .then(courses => {
-      console.log(courses);
       res.status(200).json(courses);
     }).catch(err => {
       res.status(500).json({err, message: 'Internal server error'});
@@ -40,7 +42,6 @@ router.get('/author/:username', jwtAuth, (req, res) => {
     .populate('user','username firstName lastName')
     .then(courses => {
       res.status(200).json(courses);
-      console.log('/course/user/:username : courses' + courses);
     }).catch(err => {
       console.error(err);
       res.status(500).json({message:'Internal server error'});
@@ -70,6 +71,22 @@ router.get('/:id', (req, res) => {
 // Working       
 router.post('/', jwtAuth, bodyParser.json(), (req, res) => {
 
+  // const { errors, isValid } = validateCourseInput(req.body);
+
+  // // Check Validation 
+  // if (!isValid) {
+  //   // Return any errors with 400 status
+  //   return res.status(400).json(errors);
+  // }
+
+  // // Get fields 
+  // const courseFields = {};
+  // courseFields.user = req.user.id;
+  // if (req.body.title) courseFields.title = req.body.title;
+  // if (req.body.description) courseFields.description = req.body.description;
+  // if (req.body.price) courseFields.price = req.body.price;
+
+
   const newCourse = {
     username: req.user.username,
     title: req.body.title,
@@ -77,8 +94,6 @@ router.post('/', jwtAuth, bodyParser.json(), (req, res) => {
     // lessons: req.body.lessons,
     price: req.body.price
   }
-
-  console.log(typeof req.body.lessons);
   
   // Create Course
   new Course(newCourse)
@@ -97,7 +112,6 @@ router.post('/', jwtAuth, bodyParser.json(), (req, res) => {
         return course.save()
       })
       .then(course => {
-        console.log(course);
         res.status(200).json(course);
       })
   }).catch(err => {
@@ -113,59 +127,41 @@ router.post('/:id/purchase/:token', jwtAuth, (req, res) => {
 
   Course.findById(req.params.id)
     .then(course => {
-      // let user = req.user.username;
-      // console.log(user);
-     
-      if(course.username === req.user.username) {
-        throw new Error('Cannot purchase the same course twice');        
-      }
 
-      let token = req.params.token;
-
-      if(!course.isValidToken(token)){
-        throw new Error('Invalid purchase token')
-      }
-
-      course.consumeToken(token)
-
-      return course.save();
-    })
-    .then( course => {
-
-      return  User.findOneAndUpdate ({ username: req.user.username }, {
-        $push: { courses: course }
+      User.findOne({ username: req.user.username })
+      .then( user => {
+        let found = user.courses.includes(course._id)
+        if(found){
+          throw new Error('Cannot purchase the same course twice');      
+        }
+        if(course.username === req.user.username) {
+          throw new Error('Cannot purchase your own course');        
+        }
+  
+        let token = req.params.token;
+  
+        if(!course.isValidToken(token)){
+          throw new Error('Invalid purchase token')
+        }
+  
+        course.consumeToken(token)
+  
+        return course.save()
         
-      }, { new: true }) 
-
-      .then(user => {
-        res.status(200).json(course)
+        .then( course => {
+          user.courses.push(course._id)
+          return user.save()
+        })  
+        .then(user => {
+          res.status(200).json(course)
+        })
       })
-    })  
+    })
     .catch(err => {
       console.log(err);
       res.status(422).json(err.message);
     });
-})
-
-// Version 2.0 Stripe Payment Method
-// @route     POST api/course/charge
-// @desc      Purchase Course, then will need to add the course to User.courses as an ID
-// @access    Private 
-
-// app.post("/charge", async (req, res) => {
-//   try {
-//     let {status} = await stripe.charges.create({
-//       amount: 2000,
-//       currency: "usd",
-//       description: "An example charge",
-//       source: req.body
-//     });
-
-//     res.json({status});
-//   } catch (err) {
-//     res.status(500).end();
-//   }
-// });
+  })
 
 // @route     PUT api/course/:id
 // @desc      Edit Course
@@ -180,13 +176,16 @@ router.put('/:id', jwtAuth, (req, res) => {
     if(!data){
       return res.status(400).json({message:'Course not found'});
     }
-    console.log(data);
-    res.status(200).json(data);
+   
+    res.status(200).json(data.serialize());
   }).catch((err) => {
+    console.log(err);
     res.status(404).json(err);
+
   });
  
 });
+
 
 // @route     POST api/course/comment/:course_id
 // @desc      ADD Comment to Lesson
@@ -240,7 +239,6 @@ router.delete('/comment/:id/:comment_id', jwtAuth, (req, res) => {
 router.delete('/:id', jwtAuth,  (req, res) => {
   Course.remove({_id: req.params.id})
     .then(() => {
-      console.log(req.params.id);
       res.status(200).json({message:'Succussfully deleted'});
     }).catch(err => {
       console.log(err);
