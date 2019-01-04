@@ -7,6 +7,9 @@ const jwt = require('jsonwebtoken');
 
 const config = require('../config');
 
+// Load Validation
+const validateLoginInput = require('../validation/login');
+
 const createAuthToken = function(user) {
   return jwt.sign({user}, config.JWT_SECRET, {
     subject: user.username,
@@ -29,6 +32,12 @@ router.post('/users', localAuth, (req, res) => {
 
 // The user provides a username and password to login
 router.post('/login', localAuth, (req, res) => {
+  const {errors, isValid} = validateLoginInput(req.body)
+
+  // Check validation
+  if(!isValid) {
+    return res.status(400).json(errors)
+  }
   const user = req.user.serialize();
   const authToken = createAuthToken(user);
   res.json({authToken, user});
