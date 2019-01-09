@@ -24,11 +24,11 @@ const localAuth = passport.authenticate('local', {session: false});
 router.use(bodyParser.json());
 
 // Create a New User
-router.post('/users', localAuth, (req, res) => {
-  const user = req.user.serialize();
-  const authToken = createAuthToken(req.user.serialize());
-  res.json({authToken});
-});
+// router.post('/users', localAuth, (req, res) => {
+//   const user = req.user.serialize();
+//   const authToken = createAuthToken(req.user.serialize());
+//   res.json({authToken});
+// });
 
 // The user provides a username and password to login
 router.post('/login', localAuth, (req, res) => {
@@ -37,7 +37,9 @@ router.post('/login', localAuth, (req, res) => {
   // Check validation
   if(!isValid) {
     return res.status(400).json(errors)
+    console.log(errors)
   }
+
   const user = req.user.serialize();
   const authToken = createAuthToken(user);
   res.json({authToken, user});

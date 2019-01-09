@@ -21,6 +21,7 @@ router.post('/', jsonParser, (req, res) => {
       message: 'Missing field',
       location: missingField
     });
+    console.log(res.message);
   }
 
   const stringFields = ['username', 'password', 'firstName', 'lastName','email'];

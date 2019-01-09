@@ -2,8 +2,10 @@
 exports.DATABASE_URL =
   process.env.DATABASE_URL ||
   global.DATABASE_URL ||
-  'mongodb://localhost:27017/react-app-dev';
-
+  'https://blooming-woodland-40521.herokuapp.com/';
+  // global.DATABASE_URL ||
+  // 'mongodb://localhost:27017/react-app-dev';
+  
 exports.TEST_DATABASE_URL =
   process.env.TEST_DATABASE_URL ||
   global.TEST_DATABASE_URL ||
