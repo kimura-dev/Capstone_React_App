@@ -3,6 +3,10 @@
   "version": "1.0.0",
   "description": "React App Capstone",
   "main": "server.js",
+  "scripts": {
+    "test": "mocha",
+    "start": "node server.js"
+  },
   "directories": {
     "test": "test"
   },
@@ -21,14 +25,13 @@
     "path": "^0.12.7",
     "validator": "^10.10.0"
   },
+  "engines": {
+    "node":"8.11.2"
+  },
   "devDependencies": {
     "chai": "^4.2.0",
     "chai-http": "^3.0.0",
     "mocha": "^5.2.0"
-  },
-  "scripts": {
-    "test": "mocha",
-    "start": "node server.js"
   },
   "repository": {
     "type": "git",
