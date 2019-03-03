@@ -148,18 +148,14 @@ router.post('/:id/purchase/:token', jwtAuth, (req, res) => {
 // @route     PUT api/course/:id
 // @desc      Edit Course
 // @access    Private
-router.put('/:id', jwtAuth, (req, res) => {
- console.log(req);
+router.put('/:id', jwtAuth, (req, res, next) => {
   let lessons = req.body.lessons;
-  // console.log(lessons);
 
   let promises = lessons.map(lesson => {
     if(typeof lesson === 'object'){
       if(lesson._id){
         // Edit mode
         // Async data update goes here
-
-       
         return Lesson.findByIdAndUpdate(lesson._id, lesson).then(function(){
           return lesson._id;
         });
@@ -167,65 +163,53 @@ router.put('/:id', jwtAuth, (req, res) => {
         // Create mode
         // Async data creation goes here
         return Lesson.create(lesson).then(function(newLesson){
-          // console.log(newLesson);
           return newLesson._id;
         });
       }
     } else {
       return lesson;
     }
-  })
+  });
   
-//  ORPHAN LOCATOR
-// Add promises for deleted lessons:
-// 1. We want lesson Id's, search for lessons in the db where courseId equals our req.params.id 
-Lesson.find({courseId: req.params.id})
-.then(dbLessons => {
-  // Loop through this result list and 
-  dbLessons.forEach(foundLesson => {
-    //for each of lessons find if id is not in req.body .lessons 
-
-    let shouldKeep = req.body.lessons.find( clientLesson => {
-      // console.log(JSON.stringify({client: clientLesson._id, found: foundLesson._id}))
-      if( clientLesson._id.toString() === foundLesson._id.toString() ){
-        return true;
+  //  ORPHAN LOCATOR
+  // Add promises for deleted lessons:
+  // 1. We want lesson Id's, search for lessons in the db where courseId equals our req.params.id 
+  return Lesson.find({courseId: req.params.id})
+  .then(dbLessons => {
+    // Loop through this result list and 
+    dbLessons.forEach(foundLesson => {
+      //for each of lessons find if id is not in req.body .lessons 
+      let shouldKeep = req.body.lessons.find( clientLesson => {
+        // console.log(JSON.stringify({client: clientLesson._id, found: foundLesson._id}))
+        if( clientLesson._id.toString() === foundLesson._id.toString() ){
+          return true;
+        }
+        return false;
+      } );
+      // That means youve find a deleted lessons id 
+      if( !shouldKeep ){
+        //and you should push a delete promise onto the new promises array      
+        promises.push( foundLesson.remove() );
       }
-      return false;
-    } );
-
-    // That means youve find a deleted lessons id 
-    if( !shouldKeep ){
-      //and you should push a delete promise onto the new promises array      
-      promises.push( foundLesson.remove() );
-    }
-
+    })
   })
-})
   .then(() => Promise.all(promises))
     .then(lessons => {
-      
-      Course.findByIdAndUpdate(req.params.id, {
+      return Course.findByIdAndUpdate(req.params.id, {
         ...req.body, lessons
-      }, {
-      new: true 
-      })
+      }, {new: true })
       .then((data) =>{
-      // If no course deal with error
-      if(!data){
-        return res.status(400).json({message:'Course not found'});
-      }
-      
-      res.status(200).json(data.serialize());
+        // If no course deal with error
+        if(!data){
+          return res.status(400).json({message:'Course not found'});
+        }
+        res.status(200).json(data.serialize());
       })
-      // .catch((err) => {
-      //   console.log(err);
-      // })
     })
-  //   .catch(function(err){
-  //     res.status(422).json(err.message);
-  //     console.error('err', err);
-  // })
-
+    .catch(function(err){
+      next(err);
+      console.error('err', err);
+  })
 });
 
 
