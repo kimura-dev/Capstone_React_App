@@ -85,6 +85,10 @@ app.use('*', (req, res) => {
   return res.status(404).json({ message: 'Not Found' });
 });
 
+app.use('*', (err, req, res, next) => {
+  return res.status(err.code || 500).json(err);
+});
+
 // Referenced by both runServer and closeServer. closeServer
 // assumes runServer has run and set `server` to a server object
 let server;

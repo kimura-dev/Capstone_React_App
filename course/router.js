@@ -221,10 +221,10 @@ Lesson.find({courseId: req.params.id})
       //   console.log(err);
       // })
     })
-    .catch(function(err){
-      res.status(404).json(err);
-    console.error('err', err);
-  })
+  //   .catch(function(err){
+  //     res.status(422).json(err.message);
+  //     console.error('err', err);
+  // })
 
 });
 
