@@ -167,7 +167,7 @@ router.put('/:id', jwtAuth, (req, res) => {
         // Create mode
         // Async data creation goes here
         return Lesson.create(lesson).then(function(newLesson){
-          console.log(newLesson);
+          // console.log(newLesson);
           return newLesson._id;
         });
       }
@@ -208,7 +208,8 @@ Lesson.find({courseId: req.params.id})
         ...req.body, lessons
       }, {
       new: true 
-      }).then((data) =>{
+      })
+      .then((data) =>{
       // If no course deal with error
       if(!data){
         return res.status(400).json({message:'Course not found'});
@@ -216,14 +217,14 @@ Lesson.find({courseId: req.params.id})
       
       res.status(200).json(data.serialize());
       })
-      .catch((err) => {
-        console.log(err);
-        res.status(404).json(err);
-      })
+      // .catch((err) => {
+      //   console.log(err);
+      // })
     })
-  // .catch(function(err){
-  //   console.error('err', err);
-  // })
+    .catch(function(err){
+      res.status(404).json(err);
+    console.error('err', err);
+  })
 
 });
 
