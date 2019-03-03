@@ -49,8 +49,7 @@ router.get('/:id', (req, res) => {
   Course.findOne({
     _id: req.params.id
   }) 
-  // .populate('lessons') 
-  // .populate('comments.user','username firstName lastName') 
+
   .then(course => { 
    res.status(200).json(course);
   }).catch(err => {
@@ -76,13 +75,11 @@ router.post('/', jwtAuth, bodyParser.json(), (req, res) => {
     username: req.user.username,
     title: req.body.title,
     description: req.body.description,
-    // lessons: req.body.lessons,
     price: req.body.price
   }
   
   // Create Course
   new Course(newCourse)
-  // .populate('Lesson')
   .save()
   .then(course => {
     // Make all lessons then update the old course lessons with new course lessons
@@ -152,14 +149,17 @@ router.post('/:id/purchase/:token', jwtAuth, (req, res) => {
 // @desc      Edit Course
 // @access    Private
 router.put('/:id', jwtAuth, (req, res) => {
- 
+ console.log(req);
   let lessons = req.body.lessons;
+  // console.log(lessons);
 
   let promises = lessons.map(lesson => {
     if(typeof lesson === 'object'){
       if(lesson._id){
         // Edit mode
         // Async data update goes here
+
+       
         return Lesson.findByIdAndUpdate(lesson._id, lesson).then(function(){
           return lesson._id;
         });
@@ -167,6 +167,7 @@ router.put('/:id', jwtAuth, (req, res) => {
         // Create mode
         // Async data creation goes here
         return Lesson.create(lesson).then(function(newLesson){
+          console.log(newLesson);
           return newLesson._id;
         });
       }
@@ -214,15 +215,15 @@ Lesson.find({courseId: req.params.id})
       }
       
       res.status(200).json(data.serialize());
-      }).catch((err) => {
-      console.log(err);
-      res.status(404).json(err);
-      
+      })
+      .catch((err) => {
+        console.log(err);
+        res.status(404).json(err);
       })
     })
-  .catch(function(err){
-    console.error('err', err);
-  })
+  // .catch(function(err){
+  //   console.error('err', err);
+  // })
 
 });
 

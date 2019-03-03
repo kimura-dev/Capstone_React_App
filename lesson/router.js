@@ -105,7 +105,7 @@ router.put('/:id', jwtAuth, (req, res, next) => {
     .then((lesson) => {
       let error = new Error('Lesson not found');
       error.code = 401
-      // Check for user
+  
       if (!lesson) {
         return next(error)
       }
