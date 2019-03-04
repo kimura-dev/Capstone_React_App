@@ -37,10 +37,10 @@ router.post('/login', localAuth, (req, res) => {
   const authToken = createAuthToken(user);
   res.json({authToken, user});
 })
-.catch(err => {
-  console.log(err);
-  res.status(422).json(err.message);
-});
+// .catch(err => {
+//   console.log(err);
+//   res.status(422).json(err.message);
+// });
 
 
 const jwtAuth = passport.authenticate('jwt', {session: false});
