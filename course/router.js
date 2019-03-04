@@ -181,7 +181,7 @@ router.put('/:id', jwtAuth, (req, res, next) => {
       //for each of lessons find if id is not in req.body .lessons 
       let shouldKeep = req.body.lessons.find( clientLesson => {
         // console.log(JSON.stringify({client: clientLesson._id, found: foundLesson._id}))
-        if( clientLesson._id.toString() === foundLesson._id.toString() ){
+        if(clientLesson._id && foundLesson._id && clientLesson._id.toString() === foundLesson._id.toString() ){
           return true;
         }
         return false;
