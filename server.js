@@ -13,7 +13,6 @@ const bcrypt = require('bcryptjs');
 
 // Load Models
 const {Course} = require('./course/models');
-// const {Log} = require('./log-entries/models');
 const {Lesson} = require('./lesson/models');
 
 
@@ -21,8 +20,6 @@ const {Lesson} = require('./lesson/models');
 const { router: usersRouter } = require('./users');
 const courseRouter = require('./course/router');
 const lessonRouter = require('./lesson/router');
-
-// const logRouter = require('./log-entries/router');
 const { router: authRouter, localStrategy, jwtStrategy } = require('./auth');
 
 mongoose.Promise = global.Promise;

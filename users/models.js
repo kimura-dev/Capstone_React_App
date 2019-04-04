@@ -20,14 +20,6 @@ const UserSchema = mongoose.Schema({
     max: 72,
     required: true
   },
-  // unlocked: [{
-  //   type: String,
-  //   course: {
-  //     type: mongoose.Schema.Types.ObjectId,
-  //     ref: 'Course'
-  //   },
-  //   videoViews: [Number]
-  // }],
   courses: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Course'
@@ -40,10 +32,6 @@ const UserSchema = mongoose.Schema({
     type: Date,
     default: Date.now
   },
-  // accountType: {
-  //   type: String,
-  //   default: 'student'
-  // },
   firstName: {
     type: String, default: ''
   },

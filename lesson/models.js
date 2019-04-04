@@ -16,10 +16,6 @@ const LessonSchema = new Schema({
     type: String,
     required: true
   },
-  // duration: {
-  //   value: Number,
-  //   default: 0
-  // },
   courseId: {
     type: Schema.Types.ObjectId,
     ref: 'Course',
@@ -27,10 +23,6 @@ const LessonSchema = new Schema({
   }
 });
 
-// LessonSchema.pre('find', function(next) {
-//   this.populate('course');
-//   next();
-// });
 
 LessonSchema.methods.serialize = function() {
   return {

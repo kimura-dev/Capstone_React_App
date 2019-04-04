@@ -173,14 +173,12 @@ router.put('/:id', jwtAuth, (req, res, next) => {
   
   //  ORPHAN LOCATOR
   // Add promises for deleted lessons:
-  // 1. We want lesson Id's, search for lessons in the db where courseId equals our req.params.id 
   return Lesson.find({courseId: req.params.id})
   .then(dbLessons => {
     // Loop through this result list and 
     dbLessons.forEach(foundLesson => {
       //for each of lessons find if id is not in req.body .lessons 
       let shouldKeep = req.body.lessons.find( clientLesson => {
-        // console.log(JSON.stringify({client: clientLesson._id, found: foundLesson._id}))
         if(clientLesson._id && foundLesson._id && clientLesson._id.toString() === foundLesson._id.toString() ){
           return true;
         }
@@ -221,7 +219,6 @@ router.post('/comment/:id', jwtAuth, (req, res) => {
     .then(course => {
       const newComment = {
         body: req.body.body,
-        // User is not showing up on comments
         user: req.user.username
       }
 

@@ -16,11 +16,6 @@ module.exports = function (schema, opts) {
   schema.methods.consumeToken = function (token) {
     this.timesPurchased++;
     return true;
-    // let tokenIndex = this.purchaseTokens.indexOf(token)
-
-    // this.purchaseTokens.splice(tokenIndex, 1)
-
-    // return tokenIndex >= 0;
   }
 
 }

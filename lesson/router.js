@@ -123,7 +123,6 @@ router.post('/comment/:id', jwtAuth, (req, res, next) => {
     .then(lesson => {
       const newComment = {
         body: req.body.body,
-        // User is not showing up on comments
         user: req.user.username
       }
 

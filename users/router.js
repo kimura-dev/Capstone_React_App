@@ -157,7 +157,6 @@ router.get('/:username', jwtAuth, (req, res) => {
 // @route     GET api/users/:username
 // @desc      GET 
 // @access    Public
-// NOT Working!!
 router.get('/:username/courses', (req, res) => {
   User.findOne({username: req.params.username})
     .populate('courses')
